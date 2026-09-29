@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ParcelTrack — Track Your Parcel</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;background:#f5f7fb;color:#182230}
+.header{background:#111827;color:#fff;padding:18px 20px}.nav{max-width:1100px;margin:auto;display:flex;justify-content:space-between;align-items:center}.logo{font-size:21px;font-weight:800}.logo span{color:#60a5fa}.admin{color:#cbd5e1;text-decoration:none;font-size:13px}
+.hero{background:linear-gradient(135deg,#111827,#1d4ed8);color:white;padding:60px 20px}.hero-inner{max-width:900px;margin:auto;text-align:center}.hero h1{font-size:42px;margin:0 0 12px}.hero p{color:#dbeafe;margin:0 0 28px}
+.search{display:flex;background:#fff;padding:7px;border-radius:14px;max-width:720px;margin:auto;box-shadow:0 15px 40px #0003}.search input{flex:1;border:0;outline:0;padding:15px;font-size:16px}.search button{border:0;background:#2563eb;color:#fff;padding:0 25px;border-radius:10px;font-weight:700;cursor:pointer}
+.wrap{max-width:1000px;margin:35px auto;padding:0 20px}.card{background:#fff;border:1px solid #e5e7eb;border-radius:18px;padding:25px;box-shadow:0 8px 25px #1118270a;margin-bottom:20px}.hidden{display:none}
+.top{display:flex;justify-content:space-between;gap:15px;align-items:center}.badge{padding:8px 12px;border-radius:999px;background:#dcfce7;color:#166534;font-size:13px;font-weight:700}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;margin-top:20px}.info{background:#f8fafc;padding:15px;border-radius:12px}.label{font-size:12px;color:#64748b;margin-bottom:5px}.value{font-weight:650}
+.timeline{position:relative;margin:28px 0 5px}.step{display:flex;gap:16px;position:relative;padding-bottom:25px}.dot{width:14px;height:14px;border-radius:50%;background:#2563eb;margin-top:5px;flex:none;box-shadow:0 0 0 5px #dbeafe}.step:not(:last-child):after{content:"";position:absolute;left:6px;top:22px;height:calc(100% - 12px);border-left:2px solid #bfdbfe}.step h4{margin:0 0 4px}.step p{margin:0;color:#64748b;font-size:13px}.muted .dot{background:#cbd5e1;box-shadow:0 0 0 5px #f1f5f9}.muted h4{color:#64748b}
+.notice{padding:14px;background:#eff6ff;border:1px solid #bfdbfe;color:#1e40af;border-radius:12px;font-size:13px}
+footer{text-align:center;padding:30px;color:#64748b;font-size:13px}
+@media(max-width:650px){.hero h1{font-size:32px}.search{flex-direction:column;gap:7px}.search button{height:48px}.grid{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}}
+</style>
+</head>
+<body>
+<header class="header"><div class="nav"><div class="logo">Parcel<span>Track</span></div><a class="admin" href="admin.html">Admin Dashboard →</a></div></header>
+<section class="hero"><div class="hero-inner"><h1>Track Your Parcel</h1><p>Enter your tracking number to view the latest shipment updates.</p>
+<form class="search" id="trackForm"><input id="trackingInput" placeholder="e.g. PT10001" autocomplete="off"><button>Track Parcel</button></form></div></section>
+<main class="wrap"><div id="result"></div>
+<div class="card"><div class="notice"><b>Tip:</b> Your tracking number is usually provided in your order confirmation or shipping message.</div></div></main>
+<footer>© 2026 ParcelTrack · Demo tracking system</footer>
+<script>
+const seed=[{
+ id:"PT10001",status:"Out for Delivery",location:"Jaipur Delivery Hub",eta:"30 September 2026",
+ customer:"Demo Customer",phone:"******1234",address:"Jaipur, Rajasthan, India",
+ events:[
+  ["Out for Delivery","30 Sep 2026, 09:15 AM","Parcel is with the delivery agent."],
+  ["Arrived at Delivery Hub","30 Sep 2026, 07:20 AM","Parcel reached the local delivery hub."],
+  ["In Transit","29 Sep 2026, 06:40 PM","Parcel is moving to the destination city."],
+  ["Picked Up","29 Sep 2026, 11:10 AM","Parcel picked up from the sender."],
+  ["Order Placed","28 Sep 2026, 04:30 PM","Shipment information received."]
+ ]}];
+
+function getData(){try{return JSON.parse(localStorage.getItem("parcelData"))||seed}catch(e){return seed}}
+function render(id){
+ const p=getData().find(x=>x.id.toLowerCase()===id.toLowerCase());
+ const el=document.getElementById("result");
+ if(!p){el.innerHTML=`<div class="card"><h3>Tracking number not found</h3><p style="color:#64748b">Please check the tracking ID and try again.</p></div>`;return}
+ el.innerHTML=`<div class="card">
+ <div class="top"><div><div class="label">TRACKING NUMBER</div><h2 style="margin:4px 0">${p.id}</h2></div><span class="badge">${p.status}</span></div>
+ <div class="grid">
+ <div class="info"><div class="label">CURRENT LOCATION</div><div class="value">${p.location}</div></div>
+ <div class="info"><div class="label">EXPECTED DELIVERY</div><div class="value">${p.eta}</div></div>
+ <div class="info"><div class="label">CUSTOMER</div><div class="value">${p.customer}</div></div>
+ <div class="info"><div class="label">DELIVERY ADDRESS</div><div class="value">${p.address}</div></div>
+ </div>
+ <h3 style="margin-top:30px">Shipment Timeline</h3><div class="timeline">${p.events.map((e,i)=>`<div class="step ${i>0?'':' '}"><div class="dot"></div><div><h4>${e[0]}</h4><p>${e[1]} · ${e[2]}</p></div></div>`).join("")}</div>
+ </div>`;
+}
+document.getElementById("trackForm").addEventListener("submit",e=>{e.preventDefault();const id=document.getElementById("trackingInput").value.trim();if(id)render(id)});
+</script>
+</body>
+</html>
